@@ -1,0 +1,57 @@
+{{> nav}}
+{{!-- if the object passed in has they key 'products' --}}
+{{#if products}}
+  <h2>Products</h2>
+
+  {{!-- <h2>Add New Product</h2> --}}
+
+  <form action="/products/new" method="get">
+    <input type="submit" value="Add New Product">
+  </form>
+  {{!-- if 'products' has a key called 'list' --}}
+  {{#if products.list}}
+    {{!-- looks in 'partials' directory for 'products' directory and the file 'listProducts' --}}
+    {{> products/listProducts}}
+  {{!-- if 'products' has a key called 'new' --}}
+  {{else if products.new}}
+
+    {{> products/new}}
+
+  {{else if products.product}}
+
+    {{> products/product}}
+
+    {{#if products.edit}}
+      {{> products/edit}}
+    {{/if}}
+
+  {{/if}}
+
+{{else if articles}}
+  <h2>Articles</h2>
+
+  {{!-- <h2>Add New Article</h2> --}}
+
+  <form action="/articles/new" method="get">
+    <input type="submit" value="Add New Article">
+  </form>
+  
+  {{#if articles.list}}
+
+    {{> articles/listArticles}}
+
+  {{else if articles.new}}
+
+    {{> articles/new}}
+
+  {{else if articles.article}}
+
+    {{> articles/article}}
+
+    {{#if articles.edit}}
+      {{> articles/edit}}
+    {{/if}}
+
+  {{/if}}
+
+{{/if}}

@@ -1,0 +1,16 @@
+<h2>Edit Product</h2>
+
+{{!-- products.item --}}
+<form action="/products/{{products.id}}?_method=put" method="post">
+  Name: <input type="text" name="name" value="{{products.name}}"><p>
+  Price: <input type="text" name="price" value="{{products.price}}"><p>
+  Inventory: <input type="text" name="inventory" value="{{products.inventory}}"><p>
+
+  {{!-- <input type="submit" value="EDIT"> --}}
+</form> 
+
+<h2>Delete Product</h2>
+<form action="/products/{{products.id}}?_method=delete" method="post">
+  <input type="hidden" name="name" value="{{products.id}}"><p>
+  <input type="submit" value="DELETE">
+</form>
