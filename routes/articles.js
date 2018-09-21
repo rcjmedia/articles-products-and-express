@@ -1,95 +1,89 @@
 const express = require('express');
 const router = express.Router();
+const knex = require('../knex/knex');
+const Articles_DB = require('../db/articles');
+const validations = require('../middleware/validations');
+const checkHead = require('../middleware/articleHeaderCheck');
 
-const Articles = require('../db/articles');
-const articles = new Articles();
+router.use(checkHead.checkHeader);
 
-// const validReq = { "success" : true };
-// const invalidReq = { "success" : false };
+let statusMessage = {
+  message: null
+};
 
-router.route('/')
-  .get((req, res) => {
-    res.render('index', { 
-      articles : {
-        list : articles.listAll() 
-      }
-    });
-  });
+/* ------- GET Pages ------- */
+router.get('/', (req, res) => {
+  knex.select().from('article_items')
+    .then(result => {
+      res.render('index', {
+        showArticles: true,
+        articles: result,
+        message: statusMessage.message
+      })
+      statusMessage.message = null;
+    })
+    .catch(err => console.log(err));
+});
 
-router.route('/new')
-  .get((req, res) => {
-    res.render('index', { 
-      articles : {
-        new : true 
-      }
-    });
+router.get('/new', (req, res) => {
+  res.render('new', {
+    showArticles: true,
+    message: statusMessage.message
   })
+  statusMessage.message = null;
+});
 
-  .post((req, res) => {
-    if (articles.create(req.body)) return res.redirect('/articles');
-    else return res.redirect('/articles/new');
-  });
+router.get('/:urlTitle', validations.validateArticle, (req, res) => {
+  const urltitle = encodeURI(req.params.urlTitle);
+  Articles_DB.listAllArticles(urltitle)
+    .then(result => {
+      res.render('article', {
+        article: result[0]
+      })
+    })
+    .catch(err => console.log(err));
+});
 
-router.route('/:title')
-  .get((req, res) => {
-    let title = req.params.title;
+router.get('/:urlTitle/edit', validations.validateArticle, (req, res) => {
+  const urltitle = encodeURI(req.params.urlTitle);
+  Articles_DB.listAllArticles(urltitle)
+    .then(result => {
+      return res.render('edit', {
+        showArticles: true,
+        article: result[0]
+      })
+    })
+    .catch(err => console.log(err));
+});
 
-    if (articles.verify(title)) { 
-      let data = articles.retrieve(title);
+/* ------- Methods for Create, Update, Delete -------- */
+router.post('/', validations.validateArticleInput, (req, res) => {
+  const data = req.body;
+  Articles_DB.addArticle(data)
+    .then(result => {
+      res.redirect('/articles');
+    })
+    .catch(err => console.log(err));
+});
 
-      return res.render('index', { 
-        articles : {
-          article : true,
-          title : data.title,
-          body : data.body,
-          author : data.author
-        }
-    });
+router.put('/:urlTitle', validations.validateArticle, (req, res) => {
+  const urltitle = encodeURI(req.params.urlTitle);
+  const data = req.body;
+  return Articles_DB.updateArticle(urltitle, data)
+    .then(result => {
+      res.redirect(`/articles/${encodeURI(data.title)}`)
+    })
+    .catch(err => console.log(err));
+});
 
-  } else {
-
-      return res.redirect(`/articles`);
-    }
-  })
-
-  .put((req, res) => {
-    let title = req.params.title;
-
-    if (articles.edit(req.body)) return res.redirect(`/articles/${title}`);
-    else return res.redirect(`/articles/${title}/edit`);
-  })
-
-  .delete((req, res) => {
-    let title = req.params.title;
-    console.log(title);
-
-    if (articles.remove(title)) return res.redirect('/articles');
-    else return res.redirect(`/articles/${title}`); 
-  });
-
-router.route('/:title/edit')
-  .get((req, res) => {
-    let title = req.params.title
-    let targetItem = articles.verify(title);
-
-    if (targetItem) { 
-      let data = articles.retrieve(title);
-
-      return res.render('index', { 
-        articles : {
-          article : true, 
-          edit: true,
-          title : data.title,
-          body : data.body,
-          author : data.author 
-        }
-      });
-
-    } else {
-
-      return res.redirect(`/articles/${title}`);
-    }
-  });
-
+router.delete('/:urlTitle', validations.validateArticle, (req, res) => {
+  const urltitle = encodeURI(req.params.urlTitle);
+  return Articles_DB.deleteArticle(urltitle)
+    .then(result => {
+      statusMessage.message = `Article successfully deleted!`
+      res.redirect('/articles');
+    })
+    .catch(err => console.log(err));
+});
 
 module.exports = router;

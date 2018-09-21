@@ -1,57 +1,47 @@
-{{> nav}}
-{{!-- if the object passed in has they key 'products' --}}
-{{#if products}}
-  <h2>Products</h2>
-
-  {{!-- <h2>Add New Product</h2> --}}
-
-  <form action="/products/new" method="get">
-    <input type="submit" value="Add New Product">
+{{#if showProducts}}
+<div id="productBody">
+  <h1 id="index_header">Products</h1>
+  <form action="/products/new" id="add_new">
+    <input type="submit" value="Add Product" id="add_button">
   </form>
-  {{!-- if 'products' has a key called 'list' --}}
-  {{#if products.list}}
-    {{!-- looks in 'partials' directory for 'products' directory and the file 'listProducts' --}}
-    {{> products/listProducts}}
-  {{!-- if 'products' has a key called 'new' --}}
-  {{else if products.new}}
-
-    {{> products/new}}
-
-  {{else if products.product}}
-
-    {{> products/product}}
-
-    {{#if products.edit}}
-      {{> products/edit}}
-    {{/if}}
-
-  {{/if}}
-
-{{else if articles}}
-  <h2>Articles</h2>
-
-  {{!-- <h2>Add New Article</h2> --}}
-
-  <form action="/articles/new" method="get">
-    <input type="submit" value="Add New Article">
+  <form action="/">
+    <input type="submit" value="Back" id="back_button">
   </form>
-  
-  {{#if articles.list}}
-
-    {{> articles/listArticles}}
-
-  {{else if articles.new}}
-
-    {{> articles/new}}
-
-  {{else if articles.article}}
-
-    {{> articles/article}}
-
-    {{#if articles.edit}}
-      {{> articles/edit}}
-    {{/if}}
-
-  {{/if}}
-
+  <h3>
+    {{message}}
+  </h3>
+  <div id="list_container">
+    <ul>
+      {{#each products}}
+      <a href="/products/{{this.id}}">
+        <li>{{this.name}}</li>
+      </a>
+      <p>Product ID: {{this.id}}</p>
+      {{/each}}
+    </ul>
+  </div>
+</div>
+{{/if}} {{#if showArticles}}
+<div id="articlesBody">
+  <h1 id="index_header">Articles</h1>
+  <form action="/articles/new" id="add_new">
+    <input type="submit" value="Add Article" id="add_button">
+  </form>
+  <form action="/">
+    <input type="submit" value="Back" id="back_button">
+  </form>
+  <h3>
+    {{message}}
+  </h3>
+  <div id="list_container">
+    <ul>
+      {{#each articles}}
+      <a href="/articles/{{this.urlTitle}}">
+        <li>{{this.title}}</li>
+      </a>
+      <p>Author: {{this.author}}</p>
+      {{/each}}
+    </ul>
+  </div>
+</div>
 {{/if}}

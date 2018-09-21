@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 8888;
 
 
 browserSync.init({
-	proxy: `localhost:${PORT}`
+	proxy: `localhost :${PORT}`
 });
 
 // gulp.task defines a new task giving it a name and a callback function which will be called when the task is run 
@@ -23,7 +23,5 @@ gulp.task('watch', function () {
 	gulp.watch('./public/**/*').on('change', browserSync.reload);
 	gulp.watch('./views/**/*').on('change', browserSync.reload);
 });
-
-
 
 gulp.task('default', ['watch']);

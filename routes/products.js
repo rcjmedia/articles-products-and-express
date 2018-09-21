@@ -1,102 +1,90 @@
 const express = require('express');
 const router = express.Router();
+const knex = require('../knex/knex');
+const Products_DB = require('../db/products');
+const validations = require('../middleware/validations');
 
-const Products = require('../db/products');
-const products = new Products();
+let statusMessage = {
+  message: null
+};
 
-const validReq = { "success" : true };
-const invalidReq = { "success" : false };
-
-// NEED TO USE PATH AND JOIN AND __dir FOR CROSS-PLATFORM
-router.route('/')
-  .get((req, res) => {
-    res.render('index', { 
-      products : {
-        list : products.listAll()
-      } 
-    });
-  });
-
-router.route('/new')
-  .get((req, res) => {
-    res.render('index', {
-      products : {
-        new : true
-      }
-    });
-  })
-
-  .post((req, res) => {
-    if (products.create(req.body)) return res.redirect('/products');
-    else return res.redirect('/articles/new');
-  });
-
-router.route('/:id')
-  .get((req, res) => {
-    let id = req.params.id;
-    console.log(id);
-    if (products.verify(id)) { 
-      console.log('here');
-      let data = products.retrieve(id);
-
-      return res.render('index', {
-        products : {
-          product: true,
-          id : data.id,
-          name : data.name,
-          price : data.price,
-          inventory : data.inventory
-        }
+/* ------- GET Pages ------- */
+router.get('/', (req, res) => {
+  knex.select().from('product_items')
+    .then(result => {
+      res.render('index', {
+        showProducts: true,
+        products: result,
+        message: statusMessage.message
       })
+      statusMessage.message = null;
+    })
+    .catch(err => console.log(err));
+});
 
-    } else {
-      return res.redirect(`/products`);
-    }
+router.get('/new', (req, res) => {
+  res.render('new', {
+    showProducts: true,
+    message: statusMessage.message
   })
+  statusMessage.message = null;
+});
 
-  .put((req, res) => {
-    let id = req.params.id;
-    console.log(req.body);
+router.get('/:id', validations.validateProduct, (req, res) => {
+  const id = req.params.id;
+  Products_DB.selectAllProducts(id)
+    .then(result => {
+      res.render('product', {
+        product: result[0],
+        message: statusMessage.message
+      })
+      statusMessage.message = null;
+    })
+    .catch(err => console.log(err));
+});
 
-    if (products.edit(id, req.body)) return res.redirect(`/products/${id}`);
-    else return res.redirect(`/products/${id}/edit`);
+router.get('/:id/edit', validations.validateProduct, (req, res) => {
+  const id = req.params.id;
+  Products_DB.selectAllProducts(id)
+    .then(result => {
+      res.render('edit', {
+        showProducts: true,
+        product: result[0]
+      })
+    })
+    .catch(err => console.log(err));
+});
 
-  })
+/* ------- Methods for Create, Update, Delete -------- */
+router.post('/', validations.validateItemInput, (req, res) => {
+  const data = req.body;
+  return Products_DB.addProduct(data)
+    .then(result => {
+      statusMessage.message = 'Item successfully added!';
+      res.redirect('/products');
+    })
+    .catch(err => console.log(err));
+});
 
-  .delete((req, res) => {
-    let id = req.params.id;
+router.put('/:id', validations.validateProduct, (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  Products_DB.updateProduct(id, data)
+    .then(result => {
+      statusMessage.message = 'Item successfully updated!';
+      res.redirect(`/products/${id}`)
+    })
+    .catch(err => console.log(err));
+});
 
-    if (products.remove(id)) {
-    return res.redirect('/products');
-    }
-    else return res.redirect(`/products/${id}`);
-  });
-
-router.route('/:id/edit')
-  .get((req, res) => {
-    let id = req.params.id;
-    let targetItem = products.verify(id);
-
-    if (targetItem) { 
-      let data = products.retrieve(id);
-      console.log('lksdjf', data);
-
-      return res.render('index', {
-        products : {
-          product: true,
-          edit : true,
-          id : data.id,
-          name : data.name,
-          price : data.price,
-          inventory : data.inventory
-        }
-      });
-    
-    } else {
-
-      return res.redirect(`/products/${id}`);
-    }
-  });
-
+router.delete('/:id', validations.validateProduct, (req, res) => {
+  const id = Number(req.params.id);
+  Products_DB.deleteProduct(id)
+    .then(result => {
+      statusMessage.message = 'Item successfully deleted!';
+      res.redirect('/products');
+    })
+    .catch(err => console.log(err));
+});
 
 module.exports = router;

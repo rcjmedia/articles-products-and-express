@@ -1,90 +1,60 @@
-class Articles {
-  constructor() {
-    this._articleList = [
-      {
-        title : 'Dell Annual Save Coupon',
-        body : 'We wouldnt want you to miss out on this huge savings!',
-        author : 'The Author',
-        urlTitle : 'Dell%20Annual%20Save%20Coupon'
-      },
+const knex = require('../knex/knex');
 
-      {
-        title : 'Extra hot Labor Day deals are now Live',
-        body : 'Labor Day sale up to 50% off on all the latest tech!',
-        author : 'Marketing',
-        urlTitle : 'Labor%20Day%20Deals'
-      }
-    ];
-  }
+// Demo articles
+  class Articles {
+    constructor() {
+      this.knex = require('../knex/knex');
 
-  listAll() {
-    return this._articleList;
-  }
+    this.add({
+      title : 'Dell Annual Save Coupon',
+      body : 'We wouldnt want you to miss out on this huge savings!',
+      author : 'The Author',
+      urlTitle : 'Dell%20Annual%20Save%20Coupon'
+});
+    this.add({
+      title : 'Extra hot Labor Day deals are now Live',
+      body : 'Labor Day sale up to 50% off on all the latest tech!',
+      author : 'Marketing',
+      urlTitle : 'Labor%20Day%20Deals'
+});
+}}
 
-  create(data) {
-    if (this.verify(data.title)) return false;
+function listAllArticles(url) {
+  return knex.select().from('article_items').where('urlTitle', url)
+};
 
-    let articleInfo = {
-      title : data.title,
-      body : data.body,
-      author : data.author,
-      urlTitle : encodeURI(data.title)
-    };
+function duplicates(request) {
+  const suspect = encodeURI(request.title);
+  return knex.select().from('article_items').where('urlTitle', suspect)
+};
 
-    this._articleList.push(articleInfo);
-    console.log('articleList', this._articleList);
-    return true;
-  }
-  // returns the index that the array is verifyd at
-  verify(title) {
-    return this._articleList.some(element => {
-      return element.title === title;
-    })
+function updateArticle(url, data) {
+  return knex('article_items').where('urlTitle', url).update({
+    title: data.title,
+    author: data.author,
+    body: data.body,
+    urlTitle: encodeURI(data.title)
+  })
+};
 
-    return false;
-  }
+function deleteArticle(url) {
+  return knex('article_items').where('urlTitle', url).del();
+};
 
-  locate(title) {
-    return this._articleList.findIndex((element, index) => {
-      return element.title === title;
-    })
-  }
+function addArticle(newArticle) {
+  return knex('article_items').insert({
+    title: newArticle.title,
+    author: newArticle.author,
+    body: newArticle.body,
+    urlTitle: encodeURI(newArticle.title)
+  });
+};
 
-  retrieve(title) {
-    return this._articleList.find(element => {
-      return element.title === title;
-    })
-
-    return false;
-  }
-
-  edit(data) {
-    if (this.verify(data.title)) {
-      let index = this.locate(data.title);
-      let targetItem = this._articleList[index];
-
-      if (data.title) {
-        targetItem.title = data.title;
-        targetItem.urlTitle = encodeURI(data.title);
-      }
-      if (data.body) targetItem.body = data.body;
-      if (data.author) targetItem.author = data.author;
-      
-      return true;
-    }
-
-    return false;
-  }
-
-  remove(title) {
-    if (this.verify(title)) {
-      let index = this.locate(title);
-
-      return this._articleList.splice(index, 1);
-    }
-
-    return false;
-  }
-}
-
-module.exports = Articles;
+module.exports = {
+  Articles,
+  listAllArticles,
+  updateArticle,
+  deleteArticle,
+  addArticle,
+  duplicates
+};

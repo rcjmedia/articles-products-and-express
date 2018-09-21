@@ -1,0 +1,19 @@
+<h1 id="index_header">{{article.title}}</h1>
+<h3>{{message}}</h3>
+<form action="/articles">
+  <input type="submit" value="Back" id="back_button">
+</form>
+<p id="title">{{article.title}}</p>
+<p id="author">Written by: {{article.author}}</p>
+<div id="list_container">
+  <p id="content">{{article.body}}</p>
+</div>
+
+<form action="/articles/{{article.urlTitle}}/edit" method="post" enctype="application/x-www-form-urlencoded">
+  <input type="hidden" name="_method" value="get">
+  <input type="submit" value="Edit Article" id="edit_button">
+</form>
+<form action="/articles/{{article.urlTitle}}" method="post" enctype="application/x-www-form-urlencoded">
+  <input type="hidden" name="_method" value="delete" />
+  <input type="submit" value="Delete Article" id="delete_button">
+</form>

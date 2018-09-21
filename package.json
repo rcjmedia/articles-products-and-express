@@ -2,10 +2,12 @@
   "name": "articles-products-and-express",
   "version": "1.0.0",
   "description": "## Tests Let the **tests drive your development** or write your tests after. The choice is up to you! As for the testing tools use:   - [mocha](https://mochajs.org/)   - [chai](https://chaijs.com/)   - [supertest](https://github.com/visionmedia/supertest)     - [supertest is built upon `superagent` so these docs will be helpful as well](https://github.com/visionmedia/superagent)",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js & gulp"
+    "dev": "nodemon server.js & gulp",
+    "migrate": "POSTGRES_HOSTNAME=localhost POSTGRES_CONTAINER_PORT=5432 npx knex migrate:latest",
+    "seed": "POSTGRES_HOSTNAME=localhost POSTGRES_CONTAINER_PORT=5432 npx knex seed:run"
   },
   "repository": {
     "type": "git",
@@ -19,10 +21,15 @@
   "homepage": "https://github.com/rcjmedia/articles-products-and-express#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "dotenv": "^6.0.0",
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",
+    "knex": "^0.15.2",
     "method-override": "^3.0.0",
-    "nodemon": "^1.18.4"
+    "morgan": "^1.9.1",
+    "nodemon": "^1.18.4",
+    "pg": "^7.4.3",
+    "winston": "^3.1.0"
   },
   "devDependencies": {
     "browser-sync": "^2.24.7",

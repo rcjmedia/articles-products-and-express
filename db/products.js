@@ -1,5 +1,9 @@
+const knex = require('../knex/knex');
+
 class Products {
   constructor() {
+    this._count = 1;
+    this._storage = [];
     this._productList = [
       {
         'id' : 1,
@@ -18,76 +22,32 @@ class Products {
 
     this._productNumber = 2;
   }
-  // will return full product list
-  listAll () {
-    return this._productList;
-  }
-  // will save data from req.name
-  create(data) {
-    if (this.verify(data.id)) return false;
-
-    this._productNumber += 1;
-
-    let productInfo = {
-      id : this._productNumber,
-      name : data.name,
-      price : Number(data.price),
-      inventory : Number(data.inventory)
-    };
-
-    this._productList.push(productInfo);
-    return true;
-  }
-
-  // will return reference to location of id through coersion
-  verify(id) {
-    return this._productList.some(element => {
-      return element.id === Number(id);
-    })
-
-    return false;
-  }
-
-  locate(id) {
-    return this._productList.findIndex((element, index) => {
-      return element.id === Number(id);
-    })
-  }
-
-  retrieve(id) {
-    return this._productList.find(element => {
-      return element.id === Number(id);
-    })
-
-    return false;
-  }
-
-  // will edit a product based on id
-  edit(id, data) {
-    if (this.verify(id)) {
-      let index = this.locate(id);
-      let targetItem = this._productList[index];
-
-      if (data.name) targetItem.name = data.name;
-      if (data.price) targetItem.price = data.price;
-      if (data.inventory) targetItem.inventory = data.inventory;
-      
-      return true;
-    }
-
-    return false;
-  }
-
-  // will delete a product based on id
-  remove(id) {
-    if (this.verify(id)) {
-      let index = this.locate(id);
-
-      return this._productList.splice(index, 1);
-    }
-
-    return false;
-  }
 } 
 
-module.exports = Products;
+function selectAllProducts(item) {
+  return knex.select().from('product_items').where('id', item)
+};
+
+function updateProduct(item, data) {
+  return knex('product_items').where('id', item).update({
+    name: data.name,
+    price: data.price,
+    inventory: data.inventory
+  })
+};
+
+function deleteProduct(item) {
+  return knex('product_items').where('id', item).del();
+};
+
+function addProduct(newItem) {
+  return knex('product_items').insert({ name: newItem.name, price: newItem.price, inventory: newItem.inventory });
+};
+
+module.exports = {
+  Products,
+  selectAllProducts,
+  updateProduct,
+  deleteProduct,
+  addProduct,
+};

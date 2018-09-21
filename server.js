@@ -1,35 +1,55 @@
 const express = require('express');
+const methodOverride = require('method-override');
 const app = express();
 const bodyParser = require('body-parser');
-const methodOverride = require('method-override');
-const hbs = require('express-handlebars');
-const PORT = process.env.PORT || 8888;
-const products = require('./routes/products');
 const articles = require('./routes/articles');
+const products = require(`./routes/products`);
+const exphbs = require('express-handlebars');
+const analytics = require('./middleware/analytics');
+const morgan = require('morgan');
 
-// render the styles.css
-app.use(express.static('public'));
+app.use(morgan('dev'));
 
-// I don't know what this does
-app.engine('.hbs', hbs({
-  // 'main.hbs' exists in views/layouts/
-  defaultLayout : 'main',
-  extname : '.hbs'
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(express.static('./public'));
+app.use(analytics.analyticLogger);
+
+/* --------- Method Override ---------- */
+app.use(methodOverride((req, res) => {
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    let method = req.body._method;
+    delete req.body._method;
+    return method;
+  }
+}));
+
+app.get(`/`, (req, res) => {
+  res.render('landingPage');
+});
+
+/* --------- Handle Bars ---------- */
+app.engine('.hbs', exphbs({
+  defaultLayout: 'main',
+  extname: '.hbs'
 }));
 
 app.set('view engine', '.hbs');
-app.use(bodyParser.urlencoded({ extended: true }));
-// applies methodOverride to the method assigned to _method in the URL of a form submission page
-app.use(methodOverride('_method'));
-app.get('/', (req, res) => {
-  // 'home.hbs' exists in views!!!!!/
-  // will use the default layout 'main' to build HTML and then render the contents of 'home' in the {{body}} section of 'main'
-  res.render('home');
+
+/* --------- Routes for 'articles' and 'products' ---------- */
+app.use(`/articles`, articles);
+app.use(`/products`, products)
+
+/* --------- Routes for 'articles' and 'products' ---------- */
+app.get('*', (req, res) => {
+  res.status(404).render('404');
 });
 
-app.use('/products', products);
-app.use('/articles', articles);
+app.use((err, res, req, next) => {
+  console.log(err);
+  res.status(500).send(`Oops! Something went wrong`);
+});
 
-app.listen(PORT, () => {
-  console.log(`Started app on port: ${PORT}`);
+app.listen(process.env.EXPRESS_CONTAINER_PORT, () => {
+  console.log(`Started app on port: ${process.env.EXPRESS_CONTAINER_PORT}`);
 });

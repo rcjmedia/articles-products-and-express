@@ -1,0 +1,22 @@
+<h1 id="index_header">{{product.name}}</h1>
+<form action="/products">
+  <input type="submit" value="Back" id="back_button">
+</form>
+<h3>{{message}}</h3>
+<p id="item_name">{{product.name}}</p>
+<p class="item_headers">ID</p>
+<p class="item_values">{{product.id}}</p>
+<p class="item_headers">PRICE</p>
+<p class="item_values">{{product.price}}</p>
+<p class="item_headers">Inventory Stock</p>
+<p class="item_values">{{product.inventory}}</p>
+
+<form action="/products/{{product.id}}/edit" method="post" enctype="application/x-www-form-urlencoded">
+  <input type="hidden" name="_method" value="get">
+  <input type="submit" value="Edit Item" id="edit_button">
+</form>
+
+<form action="/products/{{product.id}}" method="post" enctype="application/x-www-form-urlencoded">
+  <input type="hidden" name="_method" value="delete" />
+  <input type="submit" value="Delete Item" id="delete_button">
+</form>
